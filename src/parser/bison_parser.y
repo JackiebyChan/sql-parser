@@ -143,7 +143,7 @@
   hsql::LockingClause* locking_t;
 
   std::vector<char*>* str_vec;
-  std::unordered_set<hsql::ConstraintType>* column_constraint_set;
+  std::set<hsql::ConstraintType>* column_constraint_set;
   std::vector<hsql::Expr*>* expr_vec;
   std::vector<hsql::OrderDescription*>* order_vec;
   std::vector<hsql::SQLStatement*>* stmt_vec;
@@ -192,7 +192,7 @@
     %token SPATIAL VARCHAR VIRTUAL DESCRIBE BEFORE COLUMN CREATE DELETE DIRECT
     %token DOUBLE ESCAPE EXCEPT EXISTS EXTRACT CAST FORMAT GLOBAL HAVING IMPORT
     %token INSERT ISNULL OFFSET RENAME SCHEMA SELECT SORTED
-    %token TABLES UNIQUE UNLOAD UPDATE VALUES AFTER ALTER CROSS
+    %token TABLES UNIQUE UNLOAD UPDATE VALUES AFTER ALTER CROSS DATABASES DATABASE
     %token DELTA FLOAT GROUP INDEX INNER LIMIT LOCAL MERGE MINUS ORDER
     %token OUTER RIGHT TABLE UNION USING WHERE CALL CASE CHAR COPY DATE DATETIME
     %token DESC DROP ELSE FILE FROM FULL HASH HINT INTO JOIN
@@ -234,7 +234,7 @@
     %type <table>                  join_clause table_ref_name_no_alias
     %type <expr>                   expr operand scalar_expr unary_expr binary_expr logic_expr exists_expr extract_expr cast_expr
     %type <expr>                   function_expr between_expr expr_alias param_expr
-    %type <expr>                   column_name literal int_literal num_literal string_literal bool_literal date_literal interval_literal
+    %type <expr>                   column_name literal int_literal num_literal identifier_literal string_literal bool_literal date_literal interval_literal
     %type <expr>                   comp_expr opt_where join_condition opt_having case_expr case_list in_expr hint
     %type <expr>                   array_expr array_index null_literal
     %type <limit>                  opt_limit opt_top
@@ -472,6 +472,11 @@ export_statement : COPY table_name TO file_path opt_file_type {
  ******************************/
 
 show_statement : SHOW TABLES { $$ = new ShowStatement(kShowTables); }
+| SHOW DATABASES { $$ = new ShowStatement(kShowDatabases); }
+| SHOW CREATE TABLE table_name {
+  $$ = new ShowStatement(kShowCreateTables);
+  $$->name = $4.name;
+}
 | SHOW COLUMNS table_name {
   $$ = new ShowStatement(kShowColumns);
   $$->schema = $3.schema;
@@ -588,10 +593,10 @@ opt_decimal_specification : '(' INTVAL ',' INTVAL ')' { $$ = new std::pair<int64
 | /* empty */ { $$ = new std::pair<int64_t, int64_t>{0, 0}; };
 
 opt_column_constraints : column_constraint_set { $$ = $1; }
-| /* empty */ { $$ = new std::unordered_set<ConstraintType>(); };
+| /* empty */ { $$ = new std::set<ConstraintType>(); };
 
 column_constraint_set : column_constraint {
-  $$ = new std::unordered_set<ConstraintType>();
+  $$ = new std::set<ConstraintType>();
   $$->insert($1);
 }
 | column_constraint_set column_constraint {
@@ -814,12 +819,17 @@ opt_all : ALL { $$ = true; }
 
 select_clause : SELECT opt_top opt_distinct select_list opt_from_clause opt_where opt_group {
   $$ = new SelectStatement();
+  $$->select_object_type = kFiled;
   $$->limit = $2;
   $$->selectDistinct = $3;
   $$->selectList = $4;
   $$->fromTable = $5;
   $$->whereClause = $6;
   $$->groupBy = $7;
+}
+| SELECT DATABASE'('')'{
+  $$ = new SelectStatement();
+  $$->select_object_type = kDataBase;
 };
 
 opt_distinct : DISTINCT { $$ = true; }
@@ -871,6 +881,7 @@ opt_top : TOP int_literal { $$ = new LimitDescription($2, nullptr); }
 opt_limit : LIMIT expr { $$ = new LimitDescription($2, nullptr); }
 | OFFSET expr { $$ = new LimitDescription(nullptr, $2); }
 | LIMIT expr OFFSET expr { $$ = new LimitDescription($2, $4); }
+| LIMIT expr ',' expr { $$ = new LimitDescription($4, $2); }
 | LIMIT ALL { $$ = new LimitDescription(nullptr, nullptr); }
 | LIMIT ALL OFFSET expr { $$ = new LimitDescription(nullptr, $4); }
 | /* empty */ { $$ = nullptr; };
@@ -997,7 +1008,9 @@ column_name : IDENTIFIER { $$ = Expr::makeColumnRef($1); }
 | '*' { $$ = Expr::makeStar(); }
 | IDENTIFIER '.' '*' { $$ = Expr::makeStar($1); };
 
-literal : string_literal | bool_literal | num_literal | null_literal | date_literal | interval_literal | param_expr;
+literal : identifier_literal | string_literal | bool_literal | num_literal | null_literal | date_literal | interval_literal | param_expr;
+
+identifier_literal : IDENTIFIER { $$ = Expr::makeLiteral($1); };
 
 string_literal : STRING { $$ = Expr::makeLiteral($1); };
 

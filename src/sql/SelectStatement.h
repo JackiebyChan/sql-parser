@@ -13,6 +13,8 @@ enum SetType { kSetUnion, kSetIntersect, kSetExcept };
 enum RowLockMode { ForUpdate, ForNoKeyUpdate, ForShare, ForKeyShare };
 enum RowLockWaitPolicy { NoWait, SkipLocked, None };
 
+enum SelectObjectType { kDataBase,kFiled };
+
 // Description of the order by clause within a select statement.
 struct OrderDescription {
   OrderDescription(OrderType type, Expr* expr);
@@ -106,6 +108,7 @@ struct SelectStatement : SQLStatement {
   std::vector<WithDescription*>* withDescriptions;
   LimitDescription* limit;
   std::vector<LockingClause*>* lockings;
+  hsql::SelectObjectType select_object_type;
 };
 
 }  // namespace hsql
