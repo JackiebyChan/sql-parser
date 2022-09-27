@@ -5,7 +5,7 @@
 #include "SQLStatement.h"
 
 #include <ostream>
-#include <unordered_set>
+#include <set>
 
 // Note: Implementations of constructors and destructors can be found in statements.cpp.
 namespace hsql {
@@ -30,7 +30,7 @@ struct TableConstraint : TableElement {
 
 // Represents definition of a table column
 struct ColumnDefinition : TableElement {
-  ColumnDefinition(char* name, ColumnType type, std::unordered_set<ConstraintType>* column_constraints);
+  ColumnDefinition(char* name, ColumnType type, std::set<ConstraintType>* column_constraints);
 
   ~ColumnDefinition() override;
 
@@ -47,7 +47,7 @@ struct ColumnDefinition : TableElement {
     return true;
   }
 
-  std::unordered_set<ConstraintType>* column_constraints;
+  std::set<ConstraintType>* column_constraints;
   char* name;
   ColumnType type;
   bool nullable;

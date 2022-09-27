@@ -119,6 +119,7 @@ void printExpression(Expr* expr, uintmax_t numIndent) {
       inprint(expr->datetimeField, numIndent + 1);
       break;
     case kExprFunctionRef:
+      inprint("FUNCTION", numIndent);
       inprint(expr->name, numIndent);
       for (Expr* e : *expr->exprList) printExpression(e, numIndent + 1);
       break;
@@ -359,7 +360,13 @@ void printTransactionStatementInfo(const TransactionStatement* stmt, uintmax_t n
 void printStatementInfo(const SQLStatement* stmt) {
   switch (stmt->type()) {
     case kStmtSelect:
-      printSelectStatementInfo((const SelectStatement*)stmt, 0);
+      {
+        if (hsql::kDataBase == ((const SelectStatement*)stmt)->select_object_type) {
+          printf("select databases type%d \n",((const SelectStatement*)stmt)->select_object_type);
+          break;
+        }
+        printSelectStatementInfo((const SelectStatement*)stmt, 0);
+      }
       break;
     case kStmtInsert:
       printInsertStatementInfo((const InsertStatement*)stmt, 0);
@@ -375,6 +382,10 @@ void printStatementInfo(const SQLStatement* stmt) {
       break;
     case kStmtTransaction:
       printTransactionStatementInfo((const TransactionStatement*)stmt, 0);
+      break; 
+    case kStmtShow:
+      printf("show databases type%d , database:%s , table:%s\n",((const ShowStatement*)stmt)->type
+       , ((const ShowStatement*)stmt)->schema ,((const ShowStatement*)stmt)->name);
       break;
     default:
       break;
