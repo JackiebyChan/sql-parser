@@ -1,0 +1,65 @@
+name: release
+
+on:
+  workflow_dispatch:
+
+env:
+  CC: gcc-4.9
+  CXX: g++-4.9    
+
+jobs:
+  build:
+    name: Release Asset
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install gcc env
+        run: |
+          echo "deb http://dk.archive.ubuntu.com/ubuntu/ xenial main" | sudo tee -a /etc/apt/sources.list
+          echo "deb http://dk.archive.ubuntu.com/ubuntu/ xenial universe" | sudo tee -a /etc/apt/sources.list
+          sudo apt update
+          sudo apt install gcc-4.9 g++-4.9
+        shell: bash
+        
+      - name: Install dependency
+        run: |
+          sudo apt-get install -y make zlib1g zlib1g-dev bzip2 liblz4-dev libasan0 openssl libmxml-dev wget
+    
+      - name: make project
+        run: |
+          cd ${{github.workspace}}
+          make
+          sudo make install
+      - name: Tar bin
+        run: |
+          cd ${{github.workspace}}/
+          mkdir build/
+          cd build/
+          mkdir hsql/
+          mkdir hsql/include/
+          mkdir hsql/libs/
+          cp -r /usr/local/include/hsql/* hsql/include/
+          cp /usr/local/lib/libsqlparser.so hsql/libs/
+          tar -zcvf hsql.tar.gz hsql/
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: hsql.forked-v1
+          release_name: hsql.forked-v1
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{github.workspace}}/build/hsql.tar.gz
+          asset_name: hsql.forked-v1.tar.gz
+          asset_content_type: application/gzip
