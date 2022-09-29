@@ -1,4 +1,9 @@
-all: library
+.PHONE:all
+
+all: lexYac library
+	
+lexYac:
+	make -C ./src/parser
 
 #######################################
 ############# Directories #############
