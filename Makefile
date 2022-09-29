@@ -38,26 +38,27 @@ PARSER_CPP = $(SRCPARSER)/bison_parser.cpp  $(SRCPARSER)/flex_lexer.cpp
 PARSER_H   = $(SRCPARSER)/bison_parser.h    $(SRCPARSER)/flex_lexer.h
 LIB_CFLAGS = -std=c++11 -Wall -Werror $(OPT_FLAG)
 
-static ?= no
-ifeq ($(static), yes)
-	LIB_BUILD  = lib$(NAME).a
-	LIBLINKER = $(AR)
-	LIB_LFLAGS = rs
-else
-	LIB_BUILD  = lib$(NAME).so
-	LIBLINKER = $(CXX)
-	LIB_CFLAGS  +=  -fPIC
-	LIB_LFLAGS = -shared -o
-endif
+LIB_BUILD  = lib$(NAME).a
+LIBLINKER = $(AR)
+LIB_LFLAGS = rs
+
+LIB_BUILD_SO  = lib$(NAME).so
+LIBLINKER_SO = $(CXX)
+LIB_CFLAGS  +=  -fPIC
+LIB_LFLAGS_SO = -shared -o
+
 LIB_CPP    = $(sort $(shell find $(SRC) -name '*.cpp' -not -path "$(SRCPARSER)/*") $(PARSER_CPP))
 LIB_H      = $(shell find $(SRC) -name '*.h' -not -path "$(SRCPARSER)/*") $(PARSER_H)
 LIB_ALL    = $(shell find $(SRC) -name '*.cpp' -not -path "$(SRCPARSER)/*") $(shell find $(SRC) -name '*.h' -not -path "$(SRCPARSER)/*")
 LIB_OBJ    = $(LIB_CPP:%.cpp=%.o)
 
-library: $(LIB_BUILD)
+library: $(LIB_BUILD) $(LIB_BUILD_SO)
 
 $(LIB_BUILD): $(LIB_OBJ)
 	$(LIBLINKER) $(LIB_LFLAGS) $(LIB_BUILD) $(LIB_OBJ)
+
+$(LIB_BUILD_SO) : $(LIB_OBJ)
+	$(LIBLINKER_SO) $(LIB_LFLAGS_SO) $(LIB_BUILD_SO) $(LIB_OBJ)
 
 $(SRCPARSER)/flex_lexer.o: $(SRCPARSER)/flex_lexer.cpp $(SRCPARSER)/bison_parser.cpp
 	$(CXX) $(LIB_CFLAGS) -c -o $@ $< -Wno-sign-compare -Wno-unneeded-internal-declaration -Wno-register
