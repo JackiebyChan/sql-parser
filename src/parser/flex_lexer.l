@@ -228,7 +228,7 @@ CHARACTER[ \t\n]+VARYING TOKEN(CHARACTER_VARYING)
 ">="        TOKEN(GREATEREQ)
 "||"        TOKEN(CONCAT)
 
-[-+*/(){},.;<>=^%:?[\]|]    { return yytext[0]; }
+[-+*`/(){},.;<>=^%:?[\]|]    { return yytext[0]; }
 
 [0-9]+"."[0-9]* |
 "."[0-9]*  {

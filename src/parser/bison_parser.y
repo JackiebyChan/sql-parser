@@ -1134,9 +1134,17 @@ table_name : IDENTIFIER {
   $$.schema = nullptr;
   $$.name = $1;
 }
+| '`' IDENTIFIER '`'{
+  $$.schema = nullptr;
+  $$.name = $2;
+}
 | IDENTIFIER '.' IDENTIFIER {
   $$.schema = $1;
   $$.name = $3;
+}
+| '`' IDENTIFIER '`' '.' '`' IDENTIFIER '`' {
+  $$.schema = $2;
+  $$.name = $6;
 };
 
 opt_index_name : IDENTIFIER { $$ = $1; }
