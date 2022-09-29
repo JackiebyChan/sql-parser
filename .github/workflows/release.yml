@@ -41,6 +41,7 @@ jobs:
           mkdir hsql/libs/
           cp -r /usr/local/include/hsql/* hsql/include/
           cp /usr/local/lib/libsqlparser.so hsql/libs/
+          cp /usr/local/lib/libsqlparser.a hsql/libs/
           tar -zcvf hsql.tar.gz hsql/
       - name: Create Release
         id: create_release
