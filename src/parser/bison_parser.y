@@ -118,7 +118,7 @@
   hsql::SQLStatement* statement;
   hsql::TransactionStatement* transaction_stmt;
   hsql::UpdateStatement* update_stmt;
-  hsql::SelectStatement* set_stmt;
+  hsql::SetStatement* set_stmt;
 
   hsql::Alias* alias_t;
   hsql::AlterAction* alter_action_t;
@@ -497,7 +497,7 @@ show_statement : SHOW TABLES { $$ = new ShowStatement(kShowTables); }
  ******************************/
 set_statement : SET AUTOCOMMIT '=' INTVAL {
   $$ = new SetStatement(kSetAutocommit);
-  $$->b_autocommit = &4;
+  $$->b_autocommit = $4;
 };
 
 /******************************

@@ -384,7 +384,7 @@ SetOperation::~SetOperation() {
 }
 
 // SetStatement
-SetStatement::SetStatement(SetType type)
+SetStatement::SetStatement(SetStmtType type)
   : SQLStatement(kStmtSet)
   , set_type(type)
   , b_autocommit(true)

@@ -3,13 +3,13 @@
 
 #include "SQLStatement.h"
 namespace hsql {
-enum SetType { kDefault = -1 , kSetAutocommit };
+enum SetStmtType { kDefault = -1 , kSetAutocommit };
 
 struct SetStatement : SQLStatement {
-    SetStatement(SetType type);
+    SetStatement(SetStmtType type);
     ~SetStatement() {};
 
-    SetType set_type;
+    SetStmtType set_type;
     bool b_autocommit;
 };
 
