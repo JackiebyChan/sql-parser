@@ -239,7 +239,7 @@
     %type <expr>                   column_name literal int_literal num_literal identifier_literal string_literal bool_literal date_literal interval_literal
     %type <expr>                   comp_expr opt_where join_condition opt_having case_expr case_list in_expr hint
     %type <expr>                   array_expr array_index null_literal
-    %type <limit>                  opt_limit opt_top delete_limit
+    %type <limit>                  opt_limit opt_top write_limit
     %type <order>                  order_desc
     %type <order_type>             opt_order_type
     %type <datetime_field>         datetime_field datetime_field_plural duration_field
@@ -685,7 +685,7 @@ delete_statement : DELETE FROM table_name opt_where {
   $$->tableName = $3.name;
   $$->expr = $4;
 }
-| DELETE FROM table_name opt_where delete_limit {
+| DELETE FROM table_name opt_where write_limit {
   $$ = new DeleteStatement();
   $$->schema = $3.schema;
   $$->tableName = $3.name;
@@ -732,6 +732,13 @@ update_statement : UPDATE table_ref_name_no_alias SET update_clause_commalist op
   $$->table = $2;
   $$->updates = $4;
   $$->where = $5;
+}
+| UPDATE table_ref_name_no_alias SET update_clause_commalist opt_where write_limit{
+  $$ = new UpdateStatement();
+  $$->table = $2;
+  $$->updates = $4;
+  $$->where = $5;
+  $$->limit = $6;
 };
 
 update_clause_commalist : update_clause {
@@ -896,7 +903,7 @@ opt_order_type : ASC { $$ = kOrderAsc; }
 opt_top : TOP int_literal { $$ = new LimitDescription($2, nullptr); }
 | /* empty */ { $$ = nullptr; };
 
-delete_limit : LIMIT expr { $$ = new LimitDescription($2, nullptr); }
+write_limit : LIMIT expr { $$ = new LimitDescription($2, nullptr); }
 | /* empty */ { $$ = nullptr; };
 
 opt_limit : LIMIT expr { $$ = new LimitDescription($2, nullptr); }
