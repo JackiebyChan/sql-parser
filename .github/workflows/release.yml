@@ -43,14 +43,22 @@ jobs:
           cp /usr/local/lib/libsqlparser.so hsql/libs/
           cp /usr/local/lib/libsqlparser.a hsql/libs/
           tar -zcvf hsql.tar.gz hsql/
+          
+      - name: Truncate SHA
+        uses: 2428392/gh-truncate-string-action@v1.1.0
+        id: short-sha
+        with:
+          stringToTruncate: ${{ github.sha }}
+          maxLength: 7
+  
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: hsql.forked-v1
-          release_name: hsql.forked-v1
+          tag_name: hsql.plus-${{ steps.short-sha.outputs.string }}
+          release_name: hsql.plus-${{ steps.short-sha.outputs.string }}
           draft: false
           prerelease: false
 
@@ -62,5 +70,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{github.workspace}}/build/hsql.tar.gz
-          asset_name: hsql.forked-v1.tar.gz
+          asset_name: hsql.plus-${{ steps.short-sha.outputs.string }}.tar.gz
           asset_content_type: application/gzip
