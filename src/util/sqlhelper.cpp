@@ -387,6 +387,12 @@ void printStatementInfo(const SQLStatement* stmt) {
       printf("show databases type%d , database:%s , table:%s\n",((const ShowStatement*)stmt)->type
        , ((const ShowStatement*)stmt)->schema ,((const ShowStatement*)stmt)->name);
       break;
+    case kStmtSet:
+      {
+        printf("set type%d , value:%d" , ((const SetStatement*)stmt)->set_type 
+        , ((const SetStatement*)stmt)->b_autocommit);
+      }
+      break;
     default:
       break;
   }
