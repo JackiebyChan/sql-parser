@@ -118,6 +118,7 @@
   hsql::SQLStatement* statement;
   hsql::TransactionStatement* transaction_stmt;
   hsql::UpdateStatement* update_stmt;
+  hsql::SetStatement* set_stmt;
 
   hsql::Alias* alias_t;
   hsql::AlterAction* alter_action_t;
@@ -204,6 +205,7 @@
     %token TRUE FALSE BOOLEAN
     %token TRANSACTION BEGIN COMMIT ROLLBACK
     %token NOWAIT SKIP LOCKED SHARE
+    %token AUTOCOMMIT
 
     /*********************************
      ** Non-Terminal types (http://www.gnu.org/software/bison/manual/html_node/Type-Decl.html)
@@ -223,6 +225,7 @@
     %type <drop_stmt>              drop_statement
     %type <alter_stmt>             alter_statement
     %type <show_stmt>              show_statement
+    %type <set_stmt>               set_statement
     %type <table_name>             table_name
     %type <sval>                   opt_index_name
     %type <sval>                   file_path prepare_target_query
@@ -342,6 +345,7 @@ statement : prepare_statement opt_hints {
   $$->hints = $2;
 }
 | show_statement { $$ = $1; }
+| set_statement { $$ = $1;}
 | import_statement { $$ = $1; }
 | export_statement { $$ = $1; };
 
@@ -486,6 +490,14 @@ show_statement : SHOW TABLES { $$ = new ShowStatement(kShowTables); }
   $$ = new ShowStatement(kShowColumns);
   $$->schema = $2.schema;
   $$->name = $2.name;
+};
+
+/******************************
+ * set autocommit=0;
+ ******************************/
+set_statement : SET AUTOCOMMIT '=' INTVAL {
+  $$ = new SetStatement(kSetAutocommit);
+  $$->b_autocommit = $4;
 };
 
 /******************************

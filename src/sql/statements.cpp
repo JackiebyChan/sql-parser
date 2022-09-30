@@ -383,4 +383,13 @@ SetOperation::~SetOperation() {
   }
 }
 
+// SetStatement
+SetStatement::SetStatement(SetStmtType type)
+  : SQLStatement(kStmtSet)
+  , set_type(type)
+  , b_autocommit(true)
+{ }
+
+
+
 }  // namespace hsql
