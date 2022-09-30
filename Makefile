@@ -3,6 +3,7 @@
 all: lexYac library
 	
 lexYac:
+	make clean -C ./src/parser
 	make -C ./src/parser
 
 #######################################
