@@ -681,12 +681,16 @@ drop_action : DROP COLUMN opt_exists IDENTIFIER {
  ******************************/
 delete_statement : DELETE FROM table_name opt_where {
   $$ = new DeleteStatement();
+  $$->st_start_idx = $3.st_start_idx;
+  $$->st_end_idx = $3.st_end_idx;
   $$->schema = $3.schema;
   $$->tableName = $3.name;
   $$->expr = $4;
 }
 | DELETE FROM table_name opt_where write_limit {
   $$ = new DeleteStatement();
+  $$->st_start_idx = $3.st_start_idx;
+  $$->st_end_idx = $3.st_end_idx;
   $$->schema = $3.schema;
   $$->tableName = $3.name;
   $$->expr = $4;
@@ -706,6 +710,8 @@ truncate_statement : TRUNCATE table_name {
  ******************************/
 insert_statement : INSERT INTO table_name opt_column_list VALUES '(' literal_list ')' {
   $$ = new InsertStatement(kInsertValues);
+  $$->st_start_idx = $3.st_start_idx;
+  $$->st_end_idx = $3.st_end_idx;
   $$->schema = $3.schema;
   $$->tableName = $3.name;
   $$->columns = $4;
@@ -713,6 +719,8 @@ insert_statement : INSERT INTO table_name opt_column_list VALUES '(' literal_lis
 }
 | INSERT INTO table_name opt_column_list select_no_paren {
   $$ = new InsertStatement(kInsertSelect);
+  $$->st_start_idx = $3.st_start_idx;
+  $$->st_end_idx = $3.st_end_idx;
   $$->schema = $3.schema;
   $$->tableName = $3.name;
   $$->columns = $4;
@@ -1161,6 +1169,8 @@ table_ref_name : table_name opt_table_alias {
 
 table_ref_name_no_alias : table_name {
   $$ = new TableRef(kTableName);
+  $$->st_start_idx = $1.st_start_idx;
+  $$->st_end_idx = $1.st_end_idx;
   $$->schema = $1.schema;
   $$->name = $1.name;
 };
@@ -1168,18 +1178,26 @@ table_ref_name_no_alias : table_name {
 table_name : IDENTIFIER {
   $$.schema = nullptr;
   $$.name = $1;
+  $$.st_start_idx = yyloc.first_column;
+  $$.st_end_idx = yyloc.last_column;
 }
 | '`' IDENTIFIER '`'{
   $$.schema = nullptr;
   $$.name = $2;
+  $$.st_start_idx = yyloc.first_column;
+  $$.st_end_idx = yyloc.last_column;
 }
 | IDENTIFIER '.' IDENTIFIER {
   $$.schema = $1;
   $$.name = $3;
+  $$.st_start_idx = yyloc.first_column;
+  $$.st_end_idx = yyloc.last_column;
 }
 | '`' IDENTIFIER '`' '.' '`' IDENTIFIER '`' {
   $$.schema = $2;
   $$.name = $6;
+  $$.st_start_idx = yyloc.first_column;
+  $$.st_end_idx = yyloc.last_column;
 };
 
 opt_index_name : IDENTIFIER { $$ = $1; }

@@ -14,6 +14,7 @@ int main(int argc, char* argv[]) {
     return -1;
   }
   std::string query = argv[1];
+  printf("sql:%s" , query.c_str());
 
   // parse a given query
   hsql::SQLParserResult result;
