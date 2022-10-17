@@ -323,6 +323,12 @@ void printCreateStatementInfo(const CreateStatement* stmt, uintmax_t numIndent) 
 void printInsertStatementInfo(const InsertStatement* stmt, uintmax_t numIndent) {
   inprint("InsertStatement", numIndent);
   inprint(stmt->tableName, numIndent + 1);
+  if (stmt->schema != nullptr) {
+    inprint(stmt->schema, numIndent + 1);
+  }
+  inprint((int64_t)stmt->st_start_idx, numIndent + 1);
+  inprint((int64_t)stmt->st_end_idx, numIndent + 1);
+
   if (stmt->columns != nullptr) {
     inprint("Columns", numIndent + 1);
     for (char* col_name : *stmt->columns) {
@@ -408,25 +414,36 @@ void printStatementInfo(const SQLStatement* stmt) {
       break;
     case kStmtDelete:
       {
-        printf("delete dbname:%s , tbname:%s \n"
-        , ((const DeleteStatement*)stmt)->schema
-        , ((const DeleteStatement*)stmt)->tableName);
+        const DeleteStatement* del_stat = (const DeleteStatement*)stmt;
+        if (del_stat->schema != nullptr) {
+          printf("delete dbname:%s , tbname:%s \n"
+            , del_stat->schema
+            , del_stat->tableName);
+        }
+        printf("start idx:%d" , del_stat->st_start_idx);
+        printf("end idx:%d" , del_stat->st_end_idx);
 
-        if (((const DeleteStatement*)stmt)->limit != nullptr) {
+        if (del_stat->limit != nullptr) {
           printf("limit:");
-          printExpression(((const DeleteStatement*)stmt)->limit->limit, 0);
+          printExpression(del_stat->limit->limit, 0);
         }
       }
       break;
     case kStmtUpdate:
       {
-         printf("update dbname:%s , tbname:%s \n"
-        , ((const UpdateStatement*)stmt)->table->schema
-        , ((const UpdateStatement*)stmt)->table->name);
+        const UpdateStatement* upd_stmt = (const UpdateStatement*)stmt;
 
-        if (((const UpdateStatement*)stmt)->limit != nullptr) {
+        if (upd_stmt->table->schema != nullptr) {
+          printf("delete dbname:%s , tbname:%s \n"
+            , upd_stmt->table->schema
+            , upd_stmt->table->name);
+        }
+        printf("start idx:%d" , upd_stmt->table->st_start_idx);
+        printf("end idx:%d" , upd_stmt->table->st_end_idx);
+
+        if (upd_stmt->limit != nullptr) {
           printf("limit:");
-          printExpression(((const UpdateStatement*)stmt)->limit->limit, 0);
+          printExpression(upd_stmt->limit->limit, 0);
         }
       }
       break;
