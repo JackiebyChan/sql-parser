@@ -447,18 +447,6 @@ void printStatementInfo(const SQLStatement* stmt) {
         }
       }
       break;
-    case kStmtUpdate:
-      {
-         printf("update dbname:%s , tbname:%s \n"
-        , ((const UpdateStatement*)stmt)->table->schema
-        , ((const UpdateStatement*)stmt)->table->name);
-
-        if (((const UpdateStatement*)stmt)->limit != nullptr) {
-          printf("limit:");
-          printExpression(((const UpdateStatement*)stmt)->limit->limit, 0);
-        }
-      }
-      break;
     default:
       break;
   }
