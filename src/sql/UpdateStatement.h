@@ -6,12 +6,6 @@
 
 namespace hsql {
 
-// Represents "column = value" expressions.
-struct UpdateClause {
-  char* column;
-  Expr* value;
-};
-
 // Represents SQL Update statements.
 struct UpdateStatement : SQLStatement {
   UpdateStatement();

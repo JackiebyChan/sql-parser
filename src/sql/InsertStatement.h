@@ -5,7 +5,7 @@
 #include "SelectStatement.h"
 
 namespace hsql {
-enum InsertType { kInsertValues, kInsertSelect };
+enum InsertType { kInsertValues, kInsertSelect , kInsertSet };
 
 // Represents SQL Insert statements.
 // Example: "INSERT INTO students VALUES ('Max', 1112233, 'Musterhausen', 2.3)"
@@ -21,6 +21,7 @@ struct InsertStatement : SQLStatement {
   std::vector<char*>* columns;
   std::vector<Expr*>* values;
   SelectStatement* select;
+  std::vector<InsertClause*>* inserts;
 };
 
 }  // namespace hsql

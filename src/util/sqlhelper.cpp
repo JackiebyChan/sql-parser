@@ -345,6 +345,15 @@ void printInsertStatementInfo(const InsertStatement* stmt, uintmax_t numIndent) 
     case kInsertSelect:
       printSelectStatementInfo(stmt->select, numIndent + 1);
       break;
+    case kInsertSet:
+      {
+        inprint("insert set Values", numIndent + 1);
+        for (InsertClause* set : *stmt->inserts) {
+          inprint(set->column, numIndent + 2);
+          printExpression(set->value, numIndent + 2);
+        }
+      }
+      break;
   }
 }
 

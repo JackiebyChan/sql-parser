@@ -708,6 +708,7 @@ truncate_statement : TRUNCATE table_name {
  * Insert Statement
  * INSERT INTO students VALUES ('Max', 1112233, 'Musterhausen', 2.3)
  * INSERT INTO employees SELECT * FROM stundents
+ * INSERT INTO employees set name = 'jackie',...
  ******************************/
 insert_statement : INSERT INTO table_name opt_column_list VALUES '(' literal_list ')' {
   $$ = new InsertStatement(kInsertValues);
@@ -726,6 +727,14 @@ insert_statement : INSERT INTO table_name opt_column_list VALUES '(' literal_lis
   $$->tableName = $3.name;
   $$->columns = $4;
   $$->select = $5;
+}
+| INSERT INTO table_name SET update_clause_commalist {
+  $$ = new InsertStatement(kInsertSet);
+  $$->st_start_idx = $3.st_start_idx;
+  $$->st_end_idx = $3.st_end_idx;
+  $$->schema = $3.schema;
+  $$->tableName = $3.name;
+  $$->inserts = $5;
 };
 
 opt_column_list : '(' ident_commalist ')' { $$ = $2; }
