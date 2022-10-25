@@ -225,6 +225,7 @@
     %type <alter_stmt>             alter_statement
     %type <show_stmt>              show_statement
     %type <set_stmt>               set_statement
+    %type <sval>                   field_name
     %type <table_name>             table_name
     %type <sval>                   opt_index_name
     %type <sval>                   file_path prepare_target_query
@@ -707,6 +708,7 @@ truncate_statement : TRUNCATE table_name {
  * Insert Statement
  * INSERT INTO students VALUES ('Max', 1112233, 'Musterhausen', 2.3)
  * INSERT INTO employees SELECT * FROM stundents
+ * INSERT INTO employees set name = 'jackie',...
  ******************************/
 insert_statement : INSERT INTO table_name opt_column_list VALUES '(' literal_list ')' {
   $$ = new InsertStatement(kInsertValues);
@@ -725,6 +727,19 @@ insert_statement : INSERT INTO table_name opt_column_list VALUES '(' literal_lis
   $$->tableName = $3.name;
   $$->columns = $4;
   $$->select = $5;
+}
+| INSERT INTO table_name SET update_clause_commalist {
+  $$ = new InsertStatement(kInsertValues);
+  $$->st_start_idx = $3.st_start_idx;
+  $$->st_end_idx = $3.st_end_idx;
+  $$->schema = $3.schema;
+  $$->tableName = $3.name;
+  $$->columns = new std::vector<char*>();
+  $$->values = new std::vector<Expr*>();
+  for (UpdateClause* setCla : *$5) {
+    $$->columns->push_back(setCla->column);
+    $$->values->push_back(setCla->value);
+  }
 };
 
 opt_column_list : '(' ident_commalist ')' { $$ = $2; }
@@ -1175,29 +1190,27 @@ table_ref_name_no_alias : table_name {
   $$->name = $1.name;
 };
 
-table_name : IDENTIFIER {
+table_name : field_name {
   $$.schema = nullptr;
   $$.name = $1;
   $$.st_start_idx = yyloc.first_column;
   $$.st_end_idx = yyloc.last_column;
 }
-| '`' IDENTIFIER '`'{
-  $$.schema = nullptr;
-  $$.name = $2;
-  $$.st_start_idx = yyloc.first_column;
-  $$.st_end_idx = yyloc.last_column;
-}
-| IDENTIFIER '.' IDENTIFIER {
+| field_name '.' field_name {
   $$.schema = $1;
   $$.name = $3;
   $$.st_start_idx = yyloc.first_column;
   $$.st_end_idx = yyloc.last_column;
+};
+
+field_name : IDENTIFIER {
+  $$ = $1;
 }
-| '`' IDENTIFIER '`' '.' '`' IDENTIFIER '`' {
-  $$.schema = $2;
-  $$.name = $6;
-  $$.st_start_idx = yyloc.first_column;
-  $$.st_end_idx = yyloc.last_column;
+| '`' IDENTIFIER '`' {
+  $$ = $2;
+}
+| '"' IDENTIFIER '"' {
+  $$ = $2;
 };
 
 opt_index_name : IDENTIFIER { $$ = $1; }
