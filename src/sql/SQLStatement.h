@@ -6,12 +6,6 @@
 #include "Expr.h"
 
 namespace hsql {
-  
-// Represents "column = value" expressions.
-typedef struct UpdateClause {
-  char* column;
-  Expr* value;
-} InsertClause;
 
 enum StatementType {
   kStmtError,  // unused

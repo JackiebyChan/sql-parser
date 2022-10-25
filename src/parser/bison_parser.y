@@ -729,12 +729,17 @@ insert_statement : INSERT INTO table_name opt_column_list VALUES '(' literal_lis
   $$->select = $5;
 }
 | INSERT INTO table_name SET update_clause_commalist {
-  $$ = new InsertStatement(kInsertSet);
+  $$ = new InsertStatement(kInsertValues);
   $$->st_start_idx = $3.st_start_idx;
   $$->st_end_idx = $3.st_end_idx;
   $$->schema = $3.schema;
   $$->tableName = $3.name;
-  $$->inserts = $5;
+  $$->columns = new std::vector<char*>();
+  $$->values = new std::vector<Expr*>();
+  for (UpdateClause* setCla : *$5) {
+    $$->columns->push_back(setCla->column);
+    $$->values->push_back(setCla->value);
+  }
 };
 
 opt_column_list : '(' ident_commalist ')' { $$ = $2; }
