@@ -225,7 +225,7 @@
     %type <alter_stmt>             alter_statement
     %type <show_stmt>              show_statement
     %type <set_stmt>               set_statement
-    %type <sval>                   field_name
+    %type <sval>                   field_name 
     %type <table_name>             table_name
     %type <sval>                   opt_index_name
     %type <sval>                   file_path prepare_target_query
@@ -237,7 +237,7 @@
     %type <table>                  join_clause table_ref_name_no_alias
     %type <expr>                   expr operand scalar_expr unary_expr binary_expr logic_expr exists_expr extract_expr cast_expr equal_expr
     %type <expr>                   function_expr between_expr expr_alias param_expr
-    %type <expr>                   column_name literal int_literal num_literal identifier_literal string_literal bool_literal date_literal interval_literal
+    %type <expr>                   column_name literal int_literal num_literal identifier_literal string_literal bool_literal date_literal interval_literal 
     %type <expr>                   comp_expr opt_where join_condition opt_having case_expr case_list in_expr hint
     %type <expr>                   array_expr array_index null_literal
     %type <limit>                  opt_limit opt_top write_limit
@@ -773,7 +773,7 @@ update_clause_commalist : update_clause {
   $$ = $1;
 };
 
-update_clause : IDENTIFIER '=' expr {
+update_clause : field_name '=' expr {
   $$ = new UpdateClause();
   $$->column = $1;
   $$->value = $3;
@@ -1068,7 +1068,8 @@ column_name : IDENTIFIER { $$ = Expr::makeColumnRef($1); }
 
 literal : identifier_literal | string_literal | bool_literal | num_literal | null_literal | date_literal | interval_literal | param_expr;
 
-identifier_literal : IDENTIFIER { $$ = Expr::makeLiteral($1); };
+identifier_literal : IDENTIFIER { $$ = Expr::makeLiteral($1); }
+| '"' IDENTIFIER '"' { $$ = Expr::makeLiteral($2); };
 
 string_literal : STRING { $$ = Expr::makeLiteral($1); };
 
@@ -1208,9 +1209,6 @@ field_name : IDENTIFIER {
 }
 | '`' IDENTIFIER '`' {
   $$ = $2;
-}
-| '"' IDENTIFIER '"' {
-  $$ = $2;
 };
 
 opt_index_name : IDENTIFIER { $$ = $1; }
@@ -1341,11 +1339,11 @@ join_condition : expr;
 opt_semicolon : ';' | /* empty */
     ;
 
-ident_commalist : IDENTIFIER {
+ident_commalist : field_name {
   $$ = new std::vector<char*>();
   $$->push_back($1);
 }
-| ident_commalist ',' IDENTIFIER {
+| ident_commalist ',' field_name {
   $1->push_back($3);
   $$ = $1;
 };
