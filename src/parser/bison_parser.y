@@ -1068,8 +1068,7 @@ column_name : IDENTIFIER { $$ = Expr::makeColumnRef($1); }
 
 literal : identifier_literal | string_literal | bool_literal | num_literal | null_literal | date_literal | interval_literal | param_expr;
 
-identifier_literal : IDENTIFIER { $$ = Expr::makeLiteral($1); }
-| '"' IDENTIFIER '"' { $$ = Expr::makeLiteral($2); };
+identifier_literal : IDENTIFIER { $$ = Expr::makeLiteral($1); };
 
 string_literal : STRING { $$ = Expr::makeLiteral($1); };
 
