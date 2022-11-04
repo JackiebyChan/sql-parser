@@ -1338,11 +1338,11 @@ join_condition : expr;
 opt_semicolon : ';' | /* empty */
     ;
 
-ident_commalist : field_name {
+ident_commalist : IDENTIFIER {
   $$ = new std::vector<char*>();
   $$->push_back($1);
 }
-| ident_commalist ',' field_name {
+| ident_commalist ',' IDENTIFIER {
   $1->push_back($3);
   $$ = $1;
 };
