@@ -228,7 +228,7 @@ CHARACTER[ \t\n]+VARYING TOKEN(CHARACTER_VARYING)
 ">="        TOKEN(GREATEREQ)
 "||"        TOKEN(CONCAT)
 
-[-+*`/(){},.;<>=^%:?[\]|]    { return yytext[0]; }
+[-+*/(){},.;<>=^%:?[\]|]    { return yytext[0]; }
 
 [0-9]+"."[0-9]* |
 "."[0-9]*  {
@@ -259,11 +259,16 @@ CHARACTER[ \t\n]+VARYING TOKEN(CHARACTER_VARYING)
 \"[^\"\n]+\" {
   // Crop the leading and trailing quote char
   yylval->sval = hsql::substr(yytext, 1, strlen(yytext)-1);
-  return SQL_IDENTIFIER;
+  return SQL_STRING;
 }
 
 [A-Za-z][A-Za-z0-9_]* {
   yylval->sval = strdup(yytext);
+  return SQL_IDENTIFIER;
+}
+
+\`[A-Za-z][A-Za-z0-9_]*\` {
+  yylval->sval = hsql::substr(yytext, 1, strlen(yytext)-1);
   return SQL_IDENTIFIER;
 }
 
