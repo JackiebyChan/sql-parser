@@ -225,7 +225,6 @@
     %type <alter_stmt>             alter_statement
     %type <show_stmt>              show_statement
     %type <set_stmt>               set_statement
-    %type <sval>                   field_name 
     %type <table_name>             table_name
     %type <sval>                   opt_index_name
     %type <sval>                   file_path prepare_target_query
@@ -237,7 +236,7 @@
     %type <table>                  join_clause table_ref_name_no_alias
     %type <expr>                   expr operand scalar_expr unary_expr binary_expr logic_expr exists_expr extract_expr cast_expr equal_expr
     %type <expr>                   function_expr between_expr expr_alias param_expr
-    %type <expr>                   column_name literal int_literal num_literal identifier_literal string_literal bool_literal date_literal interval_literal 
+    %type <expr>                   column_name literal int_literal num_literal string_literal bool_literal date_literal interval_literal 
     %type <expr>                   comp_expr opt_where join_condition opt_having case_expr case_list in_expr hint
     %type <expr>                   array_expr array_index null_literal
     %type <limit>                  opt_limit opt_top write_limit
@@ -773,7 +772,7 @@ update_clause_commalist : update_clause {
   $$ = $1;
 };
 
-update_clause : field_name '=' expr {
+update_clause : IDENTIFIER '=' expr {
   $$ = new UpdateClause();
   $$->column = $1;
   $$->value = $3;
@@ -1066,9 +1065,7 @@ column_name : IDENTIFIER { $$ = Expr::makeColumnRef($1); }
 | '*' { $$ = Expr::makeStar(); }
 | IDENTIFIER '.' '*' { $$ = Expr::makeStar($1); };
 
-literal : identifier_literal | string_literal | bool_literal | num_literal | null_literal | date_literal | interval_literal | param_expr;
-
-identifier_literal : IDENTIFIER { $$ = Expr::makeLiteral($1); };
+literal : string_literal | bool_literal | num_literal | null_literal | date_literal | interval_literal | param_expr;
 
 string_literal : STRING { $$ = Expr::makeLiteral($1); };
 
@@ -1190,24 +1187,17 @@ table_ref_name_no_alias : table_name {
   $$->name = $1.name;
 };
 
-table_name : field_name {
+table_name : IDENTIFIER {
   $$.schema = nullptr;
   $$.name = $1;
   $$.st_start_idx = yyloc.first_column;
   $$.st_end_idx = yyloc.last_column;
 }
-| field_name '.' field_name {
+| IDENTIFIER '.' IDENTIFIER {
   $$.schema = $1;
   $$.name = $3;
   $$.st_start_idx = yyloc.first_column;
   $$.st_end_idx = yyloc.last_column;
-};
-
-field_name : IDENTIFIER {
-  $$ = $1;
-}
-| '`' IDENTIFIER '`' {
-  $$ = $2;
 };
 
 opt_index_name : IDENTIFIER { $$ = $1; }
