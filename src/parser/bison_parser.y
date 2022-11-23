@@ -1090,9 +1090,9 @@ date_literal : DATE STRING {
   $$ = Expr::makeDateLiteral($2);
 };
 
-interval_literal : int_literal duration_field {
-  $$ = Expr::makeIntervalLiteral($1->ival, $2);
-  delete $1;
+interval_literal : INTERVAL int_literal duration_field {
+  $$ = Expr::makeIntervalLiteral($2->ival, $3);
+  delete $2;
 }
 | INTERVAL STRING datetime_field {
   int duration{0}, chars_parsed{0};
